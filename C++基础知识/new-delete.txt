@@ -1,0 +1,20 @@
+*delete实质作用：
+	1.调用该内存块中对象的析构函数（如果有的话）、实际上没有对该内存区域数据清空（有些编译器会清空处理），也没必要。
+	2.回收该内存区域下次new使用（内存释放）
+*内存释放：可以理解为解除程序对该内存的使用权！
+*int * a = new int; 实际为两句
+ int * a;
+ a = new int;
+ a为指针变量（注意是变量，可以局部、全局 有生命周期） 存放在栈中
+ new int 为在堆中申请的内存，需要delete
+ delete并不影响指针a的值，刚delete完，a的生命周期还存在，并且指向的地址仍然是delete之前的值
+ 但是释放了（解除使用权）内存区域，此时a为野指针
+*野指针：1、指向的内存已经弹出栈区（对象过期）
+              2、指向的地址已经释放（delete）
+*malloc free: malloc返回（void*）
+ 用法：char * a = (char*)malloc(100*sizeof(char));   //需要强转成char*
+           free(a);
+
+*new int 将被转换为 new (sizeof(int));
+ new int[4]将被转换为 new (4 * sizeof(int));
+ 定位new：#include<new> 指定new的地方 用法：new(ptr) int; new(ptr) int[4]; 指定new到指针ptr指向的内存地址 至于是否需要delete ptr ，要看ptr本来指向的是否是堆内存（是否是new的）

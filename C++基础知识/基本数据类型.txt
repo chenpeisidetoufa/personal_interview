@@ -1,0 +1,28 @@
+*浮点数不能用unsigned修饰（能编译通过但是为整形）
+*float: 1bit(符号位) + 8bit(指数位) + 23bit(尾数位)
+*double: 1bit(符号位) + 11bit(指数位) + 52bit(尾数位)
+*指数位决定范围，尾数位决定精度
+
+1.int				%d
+2.short (int)			%hd(%d)
+3.long (int)			%ld(%d) 也是4字节
+4.long long (int)			%lld 8字节 不能用（%d）	
+5.unsigned (int)			%u(%d)
+6.unsigned short (int)		%hu(%d)
+7.unsigned long(int)			%lu(%d)
+8.unsigned long long(int)		%llu 不能用（%d）
+9.float				%f
+10.double			%lf（不能用%f）
+11.long double			%lf（不能用%f）
+12.指针				%p
+13.char				%c
+*%d可以用来表示比int范围大的整形（不能用来表示long long或unsigned long long）
+*	数组名+1，是+数组元素大小的字节数；数组名的地址+1，是+整个数组大小的字节数
+ 	例如：	int temp[5] = {1,2,3,4,5};
+	 	temp + 1 加4字节（int为4字节）
+		&temp + 1 加20字节 （5个int）
+* 有符号类型和无符号类型运算时一定要注意：有符号类型和无符号类型想运算默认返回无符号类型
+	int a = -7;
+	unsigned int b = 6;
+	a + b;    //其实返回的是无符号类型的4294967295 转换为有符号int 型 才是-1
+	int c = a + b; // 结果为-1 实际上是 a + b 类型提升为int

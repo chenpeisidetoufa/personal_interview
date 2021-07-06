@@ -1,0 +1,29 @@
+一、dynamic_cast: 
+	*将基类类型指针（不管指向基类还是派生类）转为派生类（向下转换时），必须有虚函数才能使用dynamic_cast， 否则编译器报错：不是多态类型
+	 若将派生类指针转为基类（向上类型转换），使用dynamic_cast则不需要虚函数。
+	*dynamic_cast的主要用途就是能够安全的将基类指针（只有基类指针指向派生类时才安全）转为派生类指针，如果不安全返回空指针！        
+	*void * 和 dynamic_cast:  void * p = dynamic_cast<void*> (pB);  //将有意义类型指针转为void* 必须有意义类型有虚函数，返回pB的值
+	 将有意义类型指针转为void*，也必须有虚函数才能使用dynamic_cast（类似向下转换但效果不同），否则编译报错：不是多态类型
+	 不能把void* 当做括号里的操作数 如果想把void* 转为有意义类型 可以使用C语言强制转换、static_cast、reinterpret_cast。
+
+二、const_cast: 去除 const 和 volatile 
+  	*volatile的本意是“易变的”,volatile关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改，
+  	 比如操作系统、硬件或者其它线程等。遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
+	*只能改变对象的底层const，例如：	const int a = 1;
+					const int *b = &a;
+					const_cast<int *>(b); //正确
+					const_cast<int>(a); //错误
+
+三、static_cast: 
+	*能单向或双向隐式转换的类型：基类和派生类 整形和枚举 double和int float和long char*和string等
+	*转换不能包含底层const；例如：	const int a = 1;
+					const int *b = &a;
+					static_cast<int>(a); //正确 
+					static_cast<int*>(b); //错误
+	*打印地址方法：cout << static_cast<const void *>(pszStr);
+	* C++11：static_cast 也可以将左值转换为右值引用：
+	TestA & b = static_cast<TestA &&> (one);    //可以
+   	int & b = static_cast<int &&> (1);  //不可以 自定义类型右值引用指向的右值有储存空间，可以取地址和被引用；
+				       //基本数据类型的右值引用指向的右值没有储存空间，不可以取地址和被引用
+
+四、reinterpret_cast:强制类型转换

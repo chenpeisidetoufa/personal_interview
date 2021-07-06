@@ -1,0 +1,55 @@
+*非成员函数不允许使用const修饰：int show（int a) const
+*成员函数使用const修饰，函数不允许修改类成员
+*int show(const int a);函数参数用const 修饰，函数不允许修改参数值
+*一般重载运算符"[ ]"operator[]时，要定义两个版本 一个带const：	type operator[](int index)const；一个不带const: type& operator[](int index) 
+ 原因：const类型对象只能调用const成员函数！ 假如对象声明为const,则它必须调用const版本的重载函数
+           若对象被传入const版本的函数参数，那么在函数体里只能使用const版本的operator[]
+*若const成员函数返回引用（此类对象或者此类中数据成员的引用），那么返回类型必须是const引用，因为const成员函数中此类对象为const版本，this是指向const的指针！
+*函数指针（函数名表示函数指针，比如void fun(int a)类型为void(int)*），函数也是有类型的，它们的类型就是返回类型和参数类型（特征标,比如void fun(int a)类型为void(int)
+*函数名与数组名类似，函数名也在不同语境下表示类型也不同，比如void fun(int a)在被引用时，类型为void(int)并不是表示指针类型void(int)*，
+  而在其他大部分情况下函数名表示类型为void(int)*
+* 函数对象的另一个重要性质：可以使用函数名、函数指针、解引用的函数指针来调用函数，因此对泛型编程支持！
+  fun(1); = p(1); = (*p)(1);
+ 1.声明函数指针：
+	void (* pt) (int a);   //这句话只是声明了返回值为void 参数为一个int类型的函数指针，并没有产生此类型函数对象。
+                void fun（int a）；//产生了对象
+  	pt = fun;
+	pt(1);	             //与fun（1）效果相同
+ 2.运用在泛型编程里（函数指针法）：
+	bool f13(int x) { return x % 13 == 0; } 
+	int count13 = std::count_if(numbers.begin(), numbers.end(), f13);  //把容器区间里的int值传入f13(int x)函数,实际上传入 std::count_if的是指向f13对象的函数指针，因为函数名表示函数指针
+*函数符包括：函数对象实体、指向函数的指针、重载了（）运算符的类对象
+ 运用在泛型编程中（类对象法）：
+   	class fun
+	{
+	private:
+		int x;
+	public:
+		fun(int a) : x(a){}
+		bool operator()(int in){ return in % x == 0; }
+	};
+	int count13 = std::count_if(numbers.begin(), numbers.end(), fun(13));   // 把容器区间里的int值传入fun(13).operator()成员函数，此时这个fun(13)构造了fun类型的对象
+							                实际上传入 std::count_if的是类对象fun(13)
+*函数指针（函数名）法和函数符（类对象）法，其实在泛型编程使用时都隐藏了输入参数的过程，本来为：
+	int count13 = std::count_if(numbers.begin(), numbers.end(), f13(容器numbers里的int值));
+	int count13 = std::count_if(numbers.begin(), numbers.end(), fun(13)(容器numbers里的int值));
+*模板函数声明不产生函数对象，实例化后才产生函数对象，例如：
+	template <typename T, typename F>
+	T use_f(T v, F f)
+	{
+		static int count = 0;   //or  static T count = 0;
+		count++;
+		cout << "  use_f count = " << count << ", &count = " << &count << endl;
+		return f(v);
+	}
+ 	use_f(y, dub)；   //y为double，dub是函数名 说明F的类型为函数指针 
+		            1.产生类型（函数类）： 返回值：double 参数（double, 类型与dub相同的函数指针&（dub））2.产生了函数对象 名字为use_f
+	use_f(y, Fp(5.0))； //y为double，Fp是函数符（类名） 说明F的类型为Fp（5.0）类对象，因此与上一句产生的函数实例（函数对象）不一样
+		              1.产生类型（函数类）： 返回值：double 参数（double, 类型与Fp的（5.0）相同的类对象）2.产生了函数对象 名字也为为use_f，但与上句话的对象不同
+		              产生结果：产生不同类型的（函数）类；当然对象也不是同一个对象
+	最后看模板函数中静态变量的问题：不同类型的函数中定义的静态变量不是同一个变量！！这点与模板类很相似，模板类实例化产生不同类型的类，他们当中的静态成员变量也不是同一个，
+				     静态成员变量属于类，但不属于实例对象。因此use_f(y, dub)；和use_f(y, Fp(5.0))；中产生两个不同的静态变量。
+* 函数与作用在基本类型上的运算符：基本运算符本质上也是函数。只是运算符是编译器需要进行进一步解释。而函数是直接调用。
+			      不同的运算符解释结果不同，例如：解除地址运算符*返回对象本身；两个int相加返回右值（立即数）；“abc”双引号不同语境返回不同；数组名不同语境返回不同...。
+			
+

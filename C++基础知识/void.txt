@@ -1,0 +1,10 @@
+* C中： void*指的是任意类型的指针
+  C++中： void*指的是无类型指针
+* void* 不能使用解除地址运算符来运算
+* C中：可以用强制类型转换将void*转为有意义类型再赋值（不能直接赋值)：int* pint;
+						             void* pvoid = new int;
+						             pint = (int*) pvoid;
+  C++中：使用reinterpret_cast将void*转为有意义类型（但不安全）：pint = reinterpret_cast<int *>(pvoid);
+                不可以使用dynamic_cast将void*转换为有意义类型，因为dynamic_cast<T *>(value)中value必须是指向完整类类型的指针，
+	但可以使用dynamic_cast将任意类型转为void*，但是必须有虚函数（类似向下转换但效果不同），否则编译器报错：不是多态类型
+                void* pv = dynamic_cast<void*>(p); 

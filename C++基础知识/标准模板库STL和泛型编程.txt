@@ -1,0 +1,177 @@
+一、标准模板库（STL）：
+1、STL的方法（包括STL的成员函数和通用的容器算法）：迭代器区间不包括超过结尾（iter_start, iter_end]
+	有时，某种算法既有STL的成员函数，也有通用的非成员函数，比如swap()，类特定成员函数比通用的算法效率高。
+	使用时注意迭代器类型
+	*size() //返回容器中的元素数目
+	*swap() //交换两个容器的内容 对于数组，交换存放的元素；对于string，重新分配内存，对于容器，只是交换了地址
+	*begin() (rbegin()返回反向迭代器 与end()返回的元素相同 超尾）
+	*end() （rend()返回反向迭代器）
+	*cbegin()  返回指向容器第一个元素的const_iterator（C++11新增容器）
+	*cend() 返回指向超尾值的const_iterator（C++11新增容器）
+	*push_back()
+	*reverse（iter_start, iter_end） //反转容器内容
+	*insert(iter_pos, iter_start, iter_end) //在位置pos插入区间（iter_start, iter_end]的元素
+	*for_each(iter_start, iter_end, 函数对象)  //函数对象不能修改区间内的值 避免显示使用迭代器变量
+	*Random_shuffle(iter_start, iter_end) //随机排列区间内的元素 要求容器支持随机访问。不能用于map
+	*sort(iter_start, iter_end) //排序 升序 要求容器支持随机访问，并且容器内的元素operate<()
+	  sort(iter_start, iter_end，函数对象) //函数对象返回值为bool 用法：bool fun (int a, int b) {return a > b;} 降序 return a < b 升序
+	*find(iter_start, iter_end, T t)
+	*copy(iter_start, iter_end, iter_pos); //前两个参数表示要复制的范围，iter_pos表示第一个元素复制到的位置
+				        前两个参数最好是输入迭代器，最后一个参数最好是输出迭代器。可用于数组和vector的元素复制
+				        copy()时目标容器长度要足够，覆盖目标容器内容，iter_pos适配为插入迭代器后不覆盖
+	*unique(iter_start, iter_end)去除相邻的重复元素（只保留一个）但是容器长度不变，与STL remove()类似
+	*set_union(iter_A_start, iter_A_end, iter_B_start, iter_B_end, iter_pos); //求并集，将A容器和B容器的内容求并集之后，放入iter_pos，覆盖容器内容，适配为插入迭代器后不覆盖。
+	  set_union(A.begin(), A.end(), B.begin(), B.end(), ostream_iterator<string, char> out (cout, "" ));   //并集输出
+            	  set_union(A.begin(), A.end(), B.begin(), B.end(), insert_iterator<set<string>> (C, C.begin()));  //并集插入
+	*set_intersection()    交集
+	*set_difference() 差集
+	*remove(iter_start, iter_end, T& t) //一般与成员函数erase一起使用,思想：先使用STL算法remove()删除4，然后按照原先顺序重新排列该链表，该前移的前移，
+				      //返回新的超尾迭代器，但是此时链表的长度没有变，后面几位也没有变再使用成员函数erase()删除链表后面无用位置。
+				      //相比之下成员方法remove()自动调整链表大小更方便
+	*transform() //详见《C++primer Plus》 p710
+	*头文件 <function> 定义了多个模板类函数对象 详见《C++primer Plus》 p711
+	*函数适配器：binder1st<f2的类型>(f2, val) f1;  //例如：binder1st<multiplies<double> >(multiplies<double>(), 2.5) f1;
+					         //使用一个二元函数符，将val值作为第一个参数，创建一个一元函数符f1
+				                         //助手：bind1st:  bind1st(multiplies<double>(), 2.5) 不用指定类型，返回一个binder1st对象
+		     binder2st<f1的类型>(f1,val) f2;   //与binder1st的区别只是将常量赋给第二个参数，也是用于将二元函数符转为一元函数符
+					         //助手：bind2st: 与bind1st类似
+		     以上两种方法由于局限性太强在C++11新标准中已被摒弃，取而代之的是bind（）函数，具体介绍参见《C++primer》P354~P357
+	*replace(iter_start, iter_end, const T& old_value, const T& new_value) //将区间old_value替换为new_value
+	  iter_result_end replace_copy(iter_start, iter_end, iter_result,const T& old_value, const T& new_value) //将区间old_value替换为new_value并将结果复制到iter_result, 
+										         //返回复制结果最后一个值后面一位迭代器
+	  replace_if(iter_start, iter_end, 一元谓词, const T& new_value)  //如果区间内的值过一遍谓词返回true，用新值替换
+	*bool next_permutation(iter_start, iter_end)  //得出下一种排列组合，如果已经为最后一种，返回false
+	  bool prev_permutation(iter_start, iter_end) //得出上一种排列组合，如果已经为最前面的一种，返回false
+	  可以通过这两个函数得到所有的排列组合 例如：{a,b,c}的排列组合从前往后 {a, b, c}、{a, c, b}、{b, a, c}、{b, c, a}、{c, a, b}、{c, b, a}
+2、关于迭代器（封装了指针，使得指针的一些基本运算（* ++ = == !=...）针对各种不同的数据结构有各自的处理方式(说白了就是operate了这些操作符)，广义上的指针）：
+	*模板使得算法独立于储存的数据类型，而迭代器使算法独立于使用的容器类型，
+	  也就是说：模板使得（* ++ = == !=...）这些基本操作能够用在不同的数据类型。
+		  而迭代器使得这些基本操作能够在程序员使用相似表示方法（只是迭代器类型不同）的前提下能够作用在不同的数据结构。
+		  事实上，迭代器也是模板已经包含了模板信息，因此，一个迭代器就已经能够使得算法独立于储存的数据类型和容器类型。
+	*为何要使用迭代器（算法接口统一化、规范化）：
+		泛型编程旨在设计一种机制：对于某种相似的处理使用相似的表示方法。
+		比如需要find()作用于对各种数据结构（数组、各类容器、链表）。那么就让迭代器作用于各类容器类似于指针作用于数组一样，能够实现++ *等运算符，
+		那么需要针对不同的数据结构重载不同的++ *等运算符。
+		但是在广义上来讲，重载的运算符完成的事情都是一样的。这也是为什么把迭代器称为广义上的指针！事实上它也可以是指针。也是为什么称作此类算法为泛型编程。
+
+二、泛型编程（面向对象关注的是数据，泛型编程关注的是算法）：
+1、迭代器类型（不同的算法对迭代器要求不同）：
+	*查找需要遍历（++）；只读
+	*排序需要随机访问,因为快速排序算法需要交换不相邻的元素；读写
+2、STL定义了5种迭代器（这五种只是一种概念，以下介绍的某些内容并不一定），这五种均可执行操作：*、==、!=
+	1）输入迭代器（InputIterator）：
+		*输入是从程序角度说的，来自容器的信息被视为输入，用来读取容器中的值，不一定修改
+		*对迭代器解引用能够访问容器中所有的值，通过支持++（前缀和后缀）
+		*例如find原型：
+			template<class InputIterator, class T>
+			InputIterator find(InputIterator first, InputIterator last, const T& value);
+		*不保证每次递增遍历的顺序不变
+		*被递增后，不保证先前的值仍然可以被解除引用。
+		*输入迭代器是单向迭代器，可以递增，但不能倒退。
+		*对于单通行（不依赖于前一次遍历时的迭代器值，也不依赖于本次遍历中前面的迭代器的值），只读算法可以使用输出
+		*典型istream_iterator：
+		 istream_iterator<int, char> in_iter(cin);  //第一个模板参数为要读取的数据类型，第二个模板参数输入流使用的字符类型
+                                 istream_iterator<int, char> in_iter();  //没有参数表示输入失败时（或尾后）的迭代器 
+		 			           //*in_iter返回输入流该迭代器指向的数据（不能这样使用：*in_iter = 15;），in_iter++为下次输入做好准备 。
+		
+	2）输出迭代器（OutputIterator）：
+		*与输入迭代器相反，信息从程序传输给容器的迭代器
+		*对迭代器解除引用能让程序修改容器的值，而不能读取容器中的值！
+		*对于单通行，只写算法，可以使用输出迭代器
+		*典型ostream_iterator：
+		  ostream_iterator<int, char> out_iter(cout, " ");   //第一个模板参数指的是发送给输出流的数据类型，第二个模板参数char指的是输出流使用的字符类型，
+						              //第一个参数指定要使用的输出流，第二个参数为分使用的分隔符字符串
+						              //*out_iter = 15;将15写入out_iter指向的位置（不能这样使用:cout << *out_iter;）；out_iter++没有什么影响，输出流自动前进。
+		  与copy()连用：
+		  ostream_iterator<int, char> out_iter(cout, " ");
+		  copy(dice.begin(), dice.end(), out_iter);       //copy算法内部使用了*out_iter++ =  或者：copy(dice.begin(), dice.end(), ostream_iterator<int, char> (cout, " ")); 
+					
+	3）正向迭代器(ForwardIterator)：
+		*具有输入迭代器和输出迭代器的全部特性
+		*只使用++来遍历容器，每次沿容器向前移动一个元素。
+		*与输入输出迭代器不同的是，按相同的顺序遍历;仍然可以用前面的迭代器值（如果储存了）解引用得到相同的值
+		  这使得多次通行算法成为可能。
+		*能够读取和修改数据，或者只能读取数据。
+	4）双向迭代器（BidirectionalIterator）：
+		*具有正向迭代器的所有特征
+		*--（前缀和后缀），支持双向遍历
+	5）随机访问迭代器（RandonAccessIterator）：
+		*具有双向迭代器的所有特性
+		*支持的操作：+ - += -= [] > < >= <= 注意：迭代器的比较操作是迭代器本身指向位置前后的比较，而不是指向的内容的大小比较
+3、 预定义迭代器：
+	*istream_iterator、ostream_iterator
+	*reverse_iterator(反向迭代器): 递增++操作将递减 ；*iter 不是对当前值解除引用，而是当前值的前一个值解除引用。
+	*下面三种插入迭代器解决了copy（）必须知道目标容器大小并且目标容器大小必须足够大的限制。并且适配了迭代器使之拥有输出迭代器的性质
+		back_insert_iterator（插入容器尾部）: 
+				          只能用于允许在尾部快速插入的容器类型，vector满足
+				          用法：vector<int> dice;
+					    vector<int> dice1;
+					    back_insert_iterator<vector<int> > back_iter(dice);
+					    copy(dice1.begin(), dice1.end(), back_iter)  //copy(dice1.begin(), dice1.end(), back_insert_iterator<vector<int> >(dice))	
+		front_insert_iterator（插入容器首部）: 只能用于允许在首部快速插入的容器类型，vector不满足，deque满足
+				          用法：deque<int> dice;
+					    front_insert_iterator<deque<int> > front_iter(dice);
+		insert_iterator（插入指定位置的前面）: 没有限制，不过没有front_insert_iterator速度快
+				          用法：insert_iterator<vector<int> > insert_iter(dice, diec.begin());
+
+三、顺序容器：
+1、容器概念：容器、序列容器、关联容器
+2、容器类型：deque、list、queue、pripority_queue、stack、vector、map、multimap、set、multiset、bitset (比特级处理数据的容器，C++11中不将其看做容器)
+	      C++11:forword_list、unordered_map、unordered_multimap、unordered_set、unordered_multiset
+3、序列（改进容器）：deque、forword_list、list、queue、pripority_queue、stack、vector
+     vector：
+	*可随机访问,随机访问迭代器可以理解为，此类型迭代器重载了operate+(int)，因此可以v.begin() + 3;
+	  也可以用类似于数组用下标访问，arr[2] 实际的运算过程是这样的：*(arr + 2)
+	*使用了C++11的含有参数类型为std::initializer_list的构造函数
+	*内部使用new，指向的数据存放在堆，但是vector对象（vector的成员指针）存放在栈或者堆（如果是new的）
+	*构造函数：template <class T, class Allocator = allocator<T> >   //类型Allocator为分配器类型，默认为allocator<T>，也是个模板类，这个类型使用new和delete管理内部空间
+		  class vector {...}
+	*vector分配连续的储存空间，对于小对象vector效率高于list，每次扩张容量，将容量扩张2倍，适用于高频率随机访问。
+	*在尾部插入、删除时间固定，但是在首部插入、删除时间线性
+	*支持rbegin(),rend()，可反转
+     deque(双端队列):
+	*支持随机访问
+	*前后插入、删除数据时间复杂度都是固定的
+	*也表示一段连续的内存区域，但与vector不同的是它支持高效地在其首部和尾部插入和删除元素，
+	  它通过两级数组结构来实现，一级表示实际的容器，第二级指向容器的首和尾
+	*比vector对象设计复杂，因此若不考虑从首位插入，vector更快
+     list(双向链表):
+	*不可随机访问，双向链表，使用双向迭代器，可以双向遍历链表
+	*表示非连续的内存区域并通过一对指向首尾元素的指针双向链接起来，插入删除效率高
+	*在任意位置插入、删除元素的时间复杂度都是固定的
+	*删除和插入数据后，原先的迭代器指向的值不变。vector因为插入后，要移动数据，因此迭代器指向的位置不变，但是值不一样。
+	*离散的，访问某个元素需要遍历，但是首位插入元素效率高。适用于对象数量变化大，对象复杂，插入和删除频繁
+	*只能使用成员函数sort(), 不能使用STL sort()，因为list不支持随机访问 
+     使用：	如果序列包含的元素数量是固定的，通常选择使用array；否则，应首先考虑使用vector，它让array的随机存取功能以及添加和删除元素的功能于一身。
+	然而，如果经常需要在序列中间添加元素，应考虑使用list或forward_list(不支持反转)。
+	如果添加和删除操作主要是在序列两端进行的，应考虑使用deque。
+4、关联容器（set、multiset、map、multimap；树形结构；键看做常量，A.begin()返回的是常量迭代器，不允许使用此迭代器修改容器内容）：
+     顺序容器的find（）需要遍历，效率不佳，因此关联容器底层的红黑树、哈希表等就是为了高效实现“按值访问元素”这类操作设计的！
+    set:
+	*顾名思义，就是集合，通常是满足/不满足某种要求得到值集合，用set最方便；set与list若需要快速判定是否有元素等于给定值，应使用set。
+	*键与值类型相同，可以说键就是值
+	*可反转，经过排序，键唯一
+	*std::set<int, less<int> > settemp; //第二个模板参数默认为less<>函数对象，用于比较排序。
+	*两个有用的成员函数：lower_bound() //返回第一个不小于键参数的迭代器
+			   upper_bound() //返回第一个不大于键参数的迭代器
+    multimap:
+	*可反转，经过排序，键与值类型不同，一个键可能与多个值相关联，键值可以重复
+	*std::multimap<int, string, less<int>> multemp; //第二个模板参数默认为less<>函数对象，用于比较排序。
+	*内部使用pair<class T, class U>
+	*使用first()和second()访问成员；count(key)此键对应的数量 lower_bound() upper_bound(); equal_range(key) 返回两个迭代器对应此键区间
+   
+    map：
+	*可反转，经过排序，键与值类型不同，一个键只能与一个值相关联，键值不可以重复
+	*所有STL容器中的值都是储存在堆内存。容器的栈内存中只存放容器对象中的固定成员（用于管理的指针），因此使用sizeof(map1)和sizeof(map2)得到的值是一样的，
+  	 但要注意容器的容量大小不能只考虑栈空间，容器空间=栈空间 + 堆空间，
+	这点与《C++ primer Plus》中的string例子类很像，虽然string类对象的大小固定（char *指针），但是在拷贝构造函数中，重新new了一块堆内存并将原来的数据拷贝进来，
+                假如这个string字符串很长，那么拷贝的速度也一定很慢。
+	*讨论：map<string, list<string>>;和map<sring,list<string>*>;
+	  map自排序（插入新元素）：排序的速度取决于map中元素的数目，和key值类型，上面两种都是用string.operator<()排序，因此只与map中元素数目大小有关。
+		排序（判断大小）完成后移动元素的速度与key和value的类型都有关系，显然,list<string>* 的移动速度要比list<string>快
+	  map的拷贝：显然map<string, list<string>*>的拷贝速度远快于map<sring,list<string>>，
+	  前者只需要将map堆中存放的指针拷贝到新的map堆中，后者则需要将map堆中存放的list<string>拷贝到新的map堆中
+	  由上述可得出结论：程序中往往在STL容器中存放指针比存放对象效率高得多！
+   无序关联容器(C++11)unordered_map、unordered_multimap、unordered_set、unordered_multiset：
+	*关联容器底层使用树结构，无序关联容器使用哈希表，提高添加/删除/查找算法的效率
+

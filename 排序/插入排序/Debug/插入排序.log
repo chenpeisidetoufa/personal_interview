@@ -1,0 +1,4 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (插入排序.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
+  插入排序.vcxproj -> C:\Users\yangyalong\Desktop\个人面试\排序\Debug\3插入排序.exe
+  插入排序.vcxproj -> C:\Users\yangyalong\Desktop\个人面试\排序\Debug\3插入排序.pdb (Full PDB)

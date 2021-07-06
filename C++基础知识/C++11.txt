@@ -1,0 +1,11 @@
+* “：”用法：
+	Qlist<POINTINFO> listPointInfo;
+	for (POINTINFO info : listPointInfo) //只读，修改用引用
+	{
+	    QStringList listItems;
+	    listItems.append(QString::number(info.dRange / 1000));
+	    listItems.append(QString::number(info.dAzimuth / PI)*180);
+	    listItems.append(QString::number(info.dPitch));
+	    ...
+	}
+    其中POINTINFO为结构体
